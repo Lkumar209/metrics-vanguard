@@ -1,0 +1,41 @@
+database:
+  name: sports_analytics.db
+  host: localhost
+  type: sqlite3
+  tables:
+    - players
+    - market_values
+    - transfers
+    - statistics
+
+api:
+  base_url: "https://v3.football.api-sports.io"
+  key: "b83f630b3c7c7dd016848edb10fb089d"
+  headers:
+    x-rapidapi-host: "v3.football.api-sports.io"
+    x-rapidapi-key: "b83f630b3c7c7dd016848edb10fb089d"
+  endpoints:
+    players: "/players"
+    transfers: "/transfers"
+    statistics: "/players/statistics"
+    squads: "/players/squads"
+
+model:
+  features:
+    - age
+    - games_played
+    - goals
+    - assists
+    - market_value
+    - minutes_played
+    - rating
+    - shots_total
+    - shots_on_target
+    - passes_total
+    - passes_accuracy
+    - tackles
+    - duels_won
+    - dribbles_success
+    - fouls_drawn
+    - cards_yellow
+    - cards_red

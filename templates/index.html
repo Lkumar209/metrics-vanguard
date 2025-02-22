@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetricsVanguard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <h1 class="text-2xl font-bold text-gray-800">MetricsVanguard</h1>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <input type="text" 
+                   id="player-search" 
+                   placeholder="Search for a player (name or ID)..." 
+                   class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+            <p class="text-sm text-gray-500 mt-2">Example IDs: Erling Haaland (418560), Kylian Mbappé (342229), Jude Bellingham (581678)</p>
+        </div>
+
+        <!-- Top Row: Player Info and Performance Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Player Info Card -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-bold mb-6">Player Information</h2>
+                <div id="player-info">
+                    <div class="flex items-center mb-6">
+                        <img id="player-image" src="" alt="" class="w-24 h-24 rounded-full mr-4 object-cover">
+                        <div>
+                            <h3 class="text-2xl font-bold" id="player-name"></h3>
+                            <p class="text-gray-500" id="player-club"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-6">
+                        <div>
+                            <p class="text-gray-500">Nationality</p>
+                            <p class="text-lg font-medium" id="player-nationality"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Age</p>
+                            <p class="text-lg font-medium" id="player-age"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Date of Birth</p>
+                            <p class="text-lg font-medium" id="player-dob"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Height</p>
+                            <p class="text-lg font-medium" id="player-height"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Preferred Foot</p>
+                            <p class="text-lg font-medium" id="player-foot"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Position</p>
+                            <p class="text-lg font-medium" id="player-position"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Agent</p>
+                            <p class="text-lg font-medium" id="player-agent"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Shirt Number</p>
+                            <p class="text-lg font-medium" id="player-number"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Contract Until</p>
+                            <p class="text-lg font-medium" id="player-contract"></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-500">Market Value</p>
+                            <p class="text-lg font-medium" id="player-value"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Statistics -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-bold mb-2">Performance Statistics</h2>
+                <p class="text-gray-500 mb-6" id="competition-info"></p>
+                <div id="performance-stats" class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Appearances</p>
+                        <p class="text-3xl font-bold" id="stat-appearances"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Goals</p>
+                        <p class="text-3xl font-bold" id="stat-goals"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Assists</p>
+                        <p class="text-3xl font-bold" id="stat-assists"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Minutes Played</p>
+                        <p class="text-3xl font-bold" id="stat-minutes"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Goals per Match</p>
+                        <p class="text-3xl font-bold" id="stat-goals-per-match"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Minutes per Goal</p>
+                        <p class="text-3xl font-bold" id="stat-minutes-per-goal"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Yellow Cards</p>
+                        <p class="text-3xl font-bold" id="stat-yellow-cards"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Red Cards</p>
+                        <p class="text-3xl font-bold" id="stat-red-cards"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Substituted On</p>
+                        <p class="text-3xl font-bold" id="stat-substituted-on"></p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-500">Substituted Off</p>
+                        <p class="text-3xl font-bold" id="stat-substituted-off"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Value Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-bold mb-6">Market Value History</h2>
+            <div id="market-value-chart"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Transfer History -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-bold mb-6">Transfer History</h2>
+                <div id="transfer-history" class="space-y-4"></div>
+            </div>
+            
+            <!-- Achievements -->
+            <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-bold mb-6">Achievements</h2>
+                <div id="achievements" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <!-- Predictions -->
+<div class="bg-white p-6 rounded-lg shadow-sm mt-6">
+    <h2 class="text-2xl font-bold mb-6">AI Predictions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+            <h3 class="text-xl font-semibold mb-4">Future Market Value</h3>
+            <div id="market-value-prediction" class="space-y-4"></div>
+        </div>
+        <div>
+            <h3 class="text-xl font-semibold mb-4">Transfer Predictions</h3>
+            <div id="transfer-predictions" class="space-y-4"></div>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    <!-- Advanced Analysis Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <!-- Similar Players -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-2xl font-bold mb-6">Similar Players</h2>
+        <div id="similar-players" class="space-y-4"></div>
+    </div>
+    
+    <!-- Career Analysis -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-2xl font-bold mb-6">Career Analysis</h2>
+        <div id="career-analysis" class="space-y-4"></div>
+    </div>
+</div>
+
+<!-- Team Fit & Financial Analysis -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <!-- Team Chemistry -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-2xl font-bold mb-6">Team Chemistry Analysis</h2>
+        <div id="team-chemistry" class="space-y-4"></div>
+    </div>
+    
+    <!-- Financial Impact -->
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+        <h2 class="text-2xl font-bold mb-6">Financial Analysis</h2>
+        <div id="financial-analysis" class="space-y-4"></div>
+    </div>
+</div>
+
+
+<script>
+    const searchInput = document.getElementById('player-search');
+
+    searchInput.addEventListener('keypress', async (event) => {
+        if (event.key === 'Enter' && searchInput.value.length > 2) {
+            const input = searchInput.value;
+            try {
+                if (/^\d+$/.test(input)) {
+                    await loadPlayerData(input);
+                } else {
+                    const response = await fetch(`/api/search?q=${input}`);
+                    const results = await response.json();
+                    
+                    if (results.length > 0) {
+                        const player = results[0];
+                        await loadPlayerData(player.id);
+                    }
+                }
+            } catch (error) {
+                console.error('Error searching:', error);
+            }
+        }
+    });
+
+    async function loadPlayerData(playerId) {
+    try {
+        // Fetch player data and predictions in parallel
+        const [
+            response, 
+            predictionsResponse, 
+            futureValueResponse,
+            similarPlayersResponse,
+            careerAnalysisResponse
+        ] = await Promise.all([
+            fetch(`/api/player/${playerId}`),
+            fetch(`/api/predictions/${playerId}`),
+            fetch(`/api/future-value/${playerId}`),
+            fetch(`/api/player/similar/${playerId}`),
+            fetch(`/api/player/career-analysis/${playerId}`),
+            fetch(`/api/player/team-chemistry/${playerId}`),
+            fetch(`/api/player/financial/${playerId}`)
+        ]);
+
+        const data = await response.json();
+        const predictionsData = await predictionsResponse.json();
+        const futureValueData = await futureValueResponse.json();
+        const similarPlayersData = await similarPlayersResponse.json();
+        const careerAnalysisData = await careerAnalysisResponse.json();
+        
+        if (data.error) {
+            console.error(data.error);
+            return;
+        }
+
+        // Update player info
+        document.getElementById('player-image').src = data.player_data.player_image;
+        document.getElementById('player-name').textContent = data.player_data.name;
+        document.getElementById('player-club').textContent = data.player_data.club;
+        document.getElementById('competition-info').textContent = data.player_data.competition_info;
+        document.getElementById('player-nationality').textContent = data.player_data.nationality;
+        document.getElementById('player-age').textContent = data.player_data.age;
+        document.getElementById('player-dob').textContent = data.player_data.date_of_birth;
+        document.getElementById('player-height').textContent = data.player_data.height;
+        document.getElementById('player-foot').textContent = data.player_data.foot;
+        document.getElementById('player-position').textContent = data.player_data.position;
+        document.getElementById('player-agent').textContent = data.player_data.agent;
+        document.getElementById('player-number').textContent = data.player_data.shirt_number;
+        document.getElementById('player-contract').textContent = data.player_data.contract_until;
+        document.getElementById('player-value').textContent = data.player_data.market_value;
+
+        // Update market value chart
+        const chartContainer = document.getElementById('market-value-chart');
+        chartContainer.innerHTML = `<img src="${data.plot_url}" style="width: 100%; height: auto;">`;
+
+        // Update performance stats
+        const statsContainer = document.getElementById('performance-stats');
+        statsContainer.innerHTML = Object.entries(data.stats).map(([key, value]) => {
+            let displayValue = value;
+            if (key === 'Minutes per Goal' || key === 'Minutes Played') {
+                const hours = Math.floor(parseInt(value) / 60);
+                const minutes = parseInt(value) % 60;
+                displayValue = `${hours}h ${minutes}m`;
+            }
+            return `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-500">${key}</p>
+                    <p class="text-2xl font-bold">${displayValue}</p>
+                </div>
+            `;
+        }).join('');
+
+        // Update transfer history
+        if (data.transfer_history) {
+            const transferHistory = document.getElementById('transfer-history');
+            transferHistory.innerHTML = data.transfer_history
+                .map(transfer => `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">${transfer.date}</span>
+                            <span class="text-blue-600 font-bold">${transfer.fee}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-600">${transfer.from}</span>
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                            <span class="text-gray-900">${transfer.to}</span>
+                        </div>
+                    </div>
+                `)
+                .join('');
+        }
+
+        // Update achievements
+        if (data.achievements) {
+            const achievements = document.getElementById('achievements');
+            achievements.innerHTML = data.achievements
+                .map(achievement => `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-900">${achievement.title}</p>
+                                <p class="text-sm text-gray-500">${achievement.competition}</p>
+                            </div>
+                            <span class="text-gray-600">${achievement.season}</span>
+                        </div>
+                    </div>
+                `)
+                .join('');
+        }
+
+        if (data.stats) {
+    const statsContainer = document.getElementById('performance-stats');
+    statsContainer.innerHTML = Object.entries(data.stats)
+        .map(([key, value]) => `
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-gray-500">${key}</p>
+                <p class="text-3xl font-bold">${value}</p>
+            </div>
+        `).join('');
+}
+
+
+        // Update transfer predictions
+            if (!predictionsData.error) {
+            const transferPredictions = document.getElementById('transfer-predictions');
+            const predictions = predictionsData.predictions
+                .split('\n')
+                .filter(line => line.startsWith('Contract Extension:') || line.startsWith('-'))
+                .map(line => {
+                    if (line.startsWith('Contract Extension:')) {
+                        const match = line.match(/Contract Extension: (\d+)% \((.*?)\)/);
+                        if (match) {
+                            const [_, probability, reason] = match;
+                            return `
+                                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                    <div class="flex items-center gap-4 mb-2">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900">Contract Extension</p>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                                <div class="bg-green-600 h-2.5 rounded-full" style="width: ${probability}%"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-lg font-bold">${probability}%</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">${reason}</p>
+                                </div>
+                            `;
+    }
+                    } else {
+                        const match = line.match(/- \*\*(.*?)\*\* - (\d+)% \((.*?)\)/);
+                        if (match) {
+                            const [_, club, probability, reason] = match;
+                            return `
+                                <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                                    <div class="flex items-center gap-4 mb-2">
+                                        <div class="flex-1">
+                                            <p class="font-semibold text-gray-900">${club}</p>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${probability}%"></div>
+                                            </div>
+                                        </div>
+                                        <span class="text-lg font-bold">${probability}%</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">${reason}</p>
+                                </div>
+                            `;
+                        }
+                    }
+                    return '';
+                })
+        .join('');
+            transferPredictions.innerHTML = predictions;
+}
+
+        // Update future value predictions
+        if (!futureValueData.error) {
+    const marketValuePrediction = document.getElementById('market-value-prediction');
+            marketValuePrediction.innerHTML = futureValueData.future_values
+        .split('\n')
+        .filter(line => line.trim() && (line.includes('Year') || line.includes('Value:') || line.includes('Key Factors:')))
+                .reduce((acc, line) => {
+                    if (line.includes('Year')) {
+                        acc.push(`<div class="bg-gray-50 p-4 rounded-lg mb-4">
+                            <p class="font-semibold text-gray-900">${line}</p>`);
+                    } else if (line.includes('Value:') || line.includes('Key Factors:')) {
+                        acc[acc.length - 1] += `<p class="text-gray-600 mt-1">${line}</p>`;
+                        if (line.includes('Key Factors:')) {
+                            acc[acc.length - 1] += '</div>';
+                        }
+                    }
+                    return acc;
+                }, [])
+        .join('');
+}
+
+        // Update similar players
+        if (!similarPlayersData.error) {
+    const similarPlayers = document.getElementById('similar-players');
+            similarPlayers.innerHTML = similarPlayersData.similar_players
+        .split('\n')
+                .map(line => `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-900">${line}</p>
+                    </div>
+                `)
+        .join('');
+}
+
+        // Update career analysis
+        if (!careerAnalysisData.error) {
+    const careerAnalysis = document.getElementById('career-analysis');
+            careerAnalysis.innerHTML = careerAnalysisData.career_analysis
+        .split('\n')
+                .map(line => `
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-900">${line}</p>
+                    </div>
+                `)
+        .join('');
+}
+
+    } catch (error) {
+        console.error('Error loading player data:', error);
+}
+}
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

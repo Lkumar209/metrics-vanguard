@@ -1,0 +1,46 @@
+/* static/style.css */
+/* Base styles - Light Mode Default */
+body {
+    background-color: white;
+    color: black;
+    transition: all 0.2s ease;
+}
+
+.card {
+    background-color: white;
+    color: black;
+    transition: all 0.2s ease;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+body.dark-mode .bg-white {
+    background-color: #1a1a1a;
+}
+
+body.dark-mode .card {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+body.dark-mode input {
+    background-color: #1a1a1a;
+    color: white;
+    border-color: #333;
+}
+
+body.dark-mode .text-gray-500,
+body.dark-mode .text-gray-600,
+body.dark-mode .text-gray-900 {
+    color: #ffffff;
+}
+
+/* Chart colors for dark mode */
+body.dark-mode .chart-container {
+    background-color: #1a1a1a;
+    color: white;
+}

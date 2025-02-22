@@ -1,0 +1,264 @@
+# src/models/market_predictor.py
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.preprocessing import StandardScaler
+from datetime import datetime
+from transfermarkt_client import TransferMarktClient
+import urllib.parse
+
+
+class MarketValuePredictor:
+    def __init__(self):
+        # Use ensemble of models for better prediction
+        self.rf_model = RandomForestRegressor(
+            n_estimators=100,
+            max_depth=10,
+            random_state=42
+        )
+        self.gb_model = GradientBoostingRegressor(
+            n_estimators=100,
+            learning_rate=0.1,
+            random_state=42
+        )
+        self.scaler = StandardScaler()
+        
+    def prepare_features(self, player_data):
+        """Extract features from TransferMarkt API data"""
+        features = {
+            'age': self._calculate_age(player_data['basic_info']['data']['player']['dateOfBirth']),
+            'current_value': player_data['basic_info']['data']['player']['marketValue']['value'],
+            'league_level': self._get_league_level(player_data),
+            'performance_stats': self._get_performance_stats(player_data),
+            'transfer_history': self._analyze_transfer_pattern(player_data),
+            'contract_info': self._get_contract_info(player_data)
+        }
+        return features
+        
+    def predict_future_value(self, player_features, years_ahead=2):
+        """Ensemble prediction combining multiple models"""
+        scaled_features = self.scaler.transform(player_features)
+        future_values = []
+        
+        for year in range(1, years_ahead + 1):
+            rf_pred = self.rf_model.predict(scaled_features)
+            gb_pred = self.gb_model.predict(scaled_features)
+            # Weighted average of predictions
+            ensemble_pred = (0.6 * rf_pred + 0.4 * gb_pred)
+            future_values.append(ensemble_pred[0])
+            
+        return future_values
+
+class TransferPredictor:
+    def __init__(self):
+        self.value_predictor = MarketValuePredictor()
+        self.club_database = {}
+        
+    def analyze_potential_clubs(self, player_data):
+        """Advanced club analysis using TransferMarkt API data"""
+        potential_clubs = []
+        
+        # Analyze club spending patterns
+        spending_patterns = self._get_club_spending_patterns()
+        
+        # Analyze squad needs
+        squad_gaps = self._analyze_squad_gaps()
+        
+        # Analyze playing style compatibility
+        style_match = self._calculate_style_compatibility()
+        
+        # Financial analysis
+        financial_capability = self._analyze_financial_capability()
+        
+        # Combine all factors for final prediction
+        club_scores = self._calculate_club_scores(
+            spending_patterns,
+            squad_gaps,
+            style_match,
+            financial_capability
+        )
+        
+        return sorted(club_scores, key=lambda x: x['probability'], reverse=True)[:5]
+    
+    def predict_next_transfer(self, player_data):
+        """Comprehensive transfer prediction"""
+        # Get player features
+        player_features = self.value_predictor.prepare_features(player_data)
+        
+        # Predict future value
+        future_value = self.value_predictor.predict_future_value(player_features)
+        
+        # Get potential clubs
+        potential_clubs = self.analyze_potential_clubs(player_data)
+        
+        # Calculate transfer probability for each window
+        transfer_probabilities = self._calculate_transfer_probabilities(
+            player_features,
+            potential_clubs,
+            future_value
+        )
+        
+        return {
+            'predicted_value': future_value,
+            'potential_clubs': potential_clubs,
+            'transfer_probabilities': transfer_probabilities,
+            'optimal_transfer_window': self._get_optimal_transfer_window()
+        }
+
+
+class PlayerFuturePredictor:
+    def __init__(self):
+        self.value_model = RandomForestRegressor(
+            n_estimators=100,
+            max_depth=10,
+            random_state=42
+        )
+        self.transfer_model = GradientBoostingRegressor()
+        
+    def predict_future(self, player_id):
+        # Collect comprehensive player data
+        player_data = self.collect_player_data(player_id)
+        
+        # Predict future value
+        future_value = self.predict_value_progression(player_data)
+        
+        # Predict potential transfers
+        potential_clubs = self.predict_transfer_destinations(player_data)
+        
+        return {
+            'predicted_value': future_value,
+            'potential_clubs': potential_clubs,
+            'transfer_probability': self.calculate_transfer_probability()
+        }
+        
+    def predict_value_progression(self, player_data):
+        features = [
+            'age', 'current_value', 'goals_per_90',
+            'assists_per_90', 'minutes_played',
+            'league_level', 'international_caps'
+        ]
+        return self.value_model.predict(features)
+        
+    def predict_transfer_destinations(self, player_data):
+        # Analyze potential destinations based on:
+        # 1. Club spending patterns
+        # 2. Squad needs
+        # 3. Financial capability
+        # 4. League level compatibility
+        return [
+            {
+                'club': 'Club Name',
+                'probability': 0.75,
+                'estimated_fee': '€XXM',
+                'transfer_window': '2024 Summer'
+            }
+        ]
+
+
+class PlayerPredictionInterface:
+    def __init__(self):
+        self.predictor = PlayerFuturePredictor()
+        self.client = TransferMarktClient()
+        
+    def get_predictions(self, player_name):
+        try:
+            # URL encode the player name
+            encoded_name = urllib.parse.quote(player_name)
+            
+            # Search for player ID using TransferMarkt API
+            search_results = self.client.search_player(encoded_name)
+            
+            # Proper error handling for search results
+            if not search_results or 'data' not in search_results:
+                return "Player not found or invalid API response"
+                
+            if not search_results['data']:
+                return "No matching players found"
+                
+            # Get first match's ID
+            player_id = search_results['data'][0]['id']
+            
+            # Get predictions
+            predictions = self.predictor.predict_future(player_id)
+            
+            return self._format_predictions(predictions)
+            
+        except Exception as e:
+            return f"Error processing request: {str(e)}"
+
+            
+    def _format_predictions(self, predictions):
+        output = []
+        
+        # Market Value Prediction
+        output.append("## Future Market Value Prediction")
+        output.append(f"Current Value: €{predictions['predicted_value'][0]:,.2f}M")
+        output.append(f"Predicted Value (2025): €{predictions['predicted_value'][1]:,.2f}M")
+        
+        # Transfer Predictions
+        output.append("\n## Transfer Predictions")
+        for club in predictions['potential_clubs']:
+            output.append(f"\nPotential Destination: {club['club']}")
+            output.append(f"Transfer Probability: {club['probability']*100:.1f}%")
+            output.append(f"Estimated Fee: {club['estimated_fee']}")
+            output.append(f"Likely Window: {club['transfer_window']}")
+            
+        return "\n".join(output)
+
+def main():
+    try:
+        # Initialize the client and predictors
+        client = TransferMarktClient()
+        value_predictor = MarketValuePredictor()
+        transfer_predictor = TransferPredictor()
+        
+        while True:
+            try:
+                player_name = input("\nEnter player name (or 'quit' to exit): ")
+                if player_name.lower() == 'quit':
+                    break
+                
+                # Search for player ID automatically
+                encoded_name = urllib.parse.quote(player_name)
+                search_results = client.search_player(encoded_name)
+                
+                if not search_results or 'data' not in search_results:
+                    print("Player not found")
+                    continue
+                
+                # Get first match's ID
+                player_id = search_results['data'][0]['id']
+                print(f"\nFound player with ID: {player_id}")
+                
+                # Fetch player data
+                player_data = client.get_player_info(player_id)
+                
+                if player_data:
+                     
+                    # Get future predictions
+                    features = value_predictor.prepare_features(player_data)
+                    future_value = value_predictor.predict_future_value(features)
+                    transfer_prediction = transfer_predictor.predict_next_transfer(player_data)
+                    
+                    # Print predictions
+                    print("\n## Future Predictions")
+                    print(f"Predicted Value 2025: €{future_value[0]:,.2f}M")
+                    print("\nPotential Transfer Destinations:")
+                    for club in transfer_prediction['potential_clubs']:
+                        print(f"- {club['club']}: {club['probability']*100:.1f}% probability")
+                        print(f"  Estimated Fee: {club['estimated_fee']}")
+                        print(f"  Likely Window: {club['transfer_window']}")
+                else:
+                    print("Error: Unable to fetch player data")
+                    
+            except ValueError as e:
+                print(f"Invalid input: {e}")
+                
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        print("\nThank you for using the Player Analytics tool!")
+
+if __name__ == "__main__":
+    print("Welcome to Player Analytics!")
+    print("This tool fetches player data from TransferMarkt and predicts future transfers")
+    main()
