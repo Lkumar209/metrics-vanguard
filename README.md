@@ -1,4 +1,3 @@
-# metrics-vanguard
 
 # MetricsVanguard 🚀
 
